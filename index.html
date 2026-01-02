@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>JLPT N4 文法模擬試験</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #eff6ff, #e0e7ff);
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 16px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    }
+    h1, h2 {
+      margin-top: 0;
+    }
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 16px;
+    }
+    .test-btn {
+      margin-right: 6px;
+      margin-bottom: 6px;
+      padding: 8px 14px;
+      background: #e5e7eb;
+    }
+    .test-btn.active {
+      background: #4f46e5;
+      color: #fff;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      border: 2px solid #d1d5db;
+      margin-bottom: 10px;
+      background: #fff;
+    }
+    .option.selected {
+      background: #e0e7ff;
+      border-color: #6366f1;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.wrong {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .footer-btn {
+      width: 100%;
+      background: #4f46e5;
+      color: #fff;
+      font-weight: bold;
+    }
+    .footer-btn:disabled {
+      background: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="card">
+    <h1>JLPT N4 文法模擬試験</h1>
+    <div id="testButtons"></div>
+  </div>
+
+  <div class="card" id="quizCard"></div>
+
+</div>
+
+<script>
+const tests = [
+  {
+    title: "第1回",
+    questions: [
+      { q: "毎朝6時(　　)起きます。", opts: ["で","に","を","が"], correct: 1, explanation: "時刻には助詞「に」を使います。" },
+      { q: "この本は私(　　)友達にもらいました。", opts: ["の","を","に","と"], correct: 0, explanation: "所有・関係を示すには「の」を使います。" }
+    ]
+  }
+];
+
+let currentTest = 0;
+let currentQuestion = 0;
+let selectedAnswer = null;
+let userAnswers = [];
+let showResult = false;
+
+const testButtons = document.getElementById("testButtons");
+const quizCard = document.getElementById("quizCard");
+
+function renderTestButtons() {
+  testButtons.innerHTML = "";
+  tests.forEach((t, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = t.title;
+    btn.className = "test-btn" + (i === currentTest ? " active" : "");
+    btn.onclick = () => {
+      currentTest = i;
+      currentQuestion = 0;
+      userAnswers = [];
+      selectedAnswer = null;
+      showResult = false;
+      render();
+    };
+    testButtons.appendChild(btn);
+  });
+}
+
+function render() {
+  const q = tests[currentTest].questions[currentQuestion];
+  quizCard.innerHTML = `
+    <h2>${q.q}</h2>
+    ${q.opts.map((o, i) => `
+      <button class="option
+        ${selectedAnswer === i ? "selected" : ""}
+        ${showResult && i === q.correct ? "correct" : ""}
+        ${showResult && selectedAnswer === i && i !== q.correct ? "wrong" : ""}"
+        onclick="selectAnswer(${i})"
+        ${showResult ? "disabled" : ""}>
+        ${i + 1}. ${o}
+      </button>
+    `).join("")}
+
+    ${showResult ? `
+      <p><strong>${selectedAnswer === q.correct ? "せいかい！" : "まちがい"}</strong></p>
+      <p>${q.explanation}</p>
+      <button class="footer-btn" onclick="next()">つぎへ</button>
+    ` : `
+      <button class="footer-btn" onclick="submit()" ${selectedAnswer === null ? "disabled" : ""}>
+        かいとうする
+      </button>
+    `}
+  `;
+}
+
+function selectAnswer(i) {
+  selectedAnswer = i;
+  render();
+}
+
+function submit() {
+  userAnswers[currentQuestion] = selectedAnswer;
+  showResult = true;
+  render();
+}
+
+function next() {
+  if (currentQuestion < tests[currentTest].questions.length - 1) {
+    currentQuestion++;
+    selectedAnswer = null;
+    showResult = false;
+    render();
+  } else {
+    quizCard.innerHTML = "<h2>テスト終了</h2>";
+  }
+}
+
+renderTestButtons();
+render();
+</script>
+
+</body>
+</html>
